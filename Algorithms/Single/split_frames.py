@@ -1,5 +1,5 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #                                                                                                             #
-#                 _   _   _              __                                                                 #
+#                  _   _   _              __                                                                #
 #    ___   _ __   | | (_) | |_           / _|  _ __    __ _   _ __ ___     ___   ___       _ __    _   _    #
 #   / __| | '_ \  | | | | | __|         | |_  | '__|  / _` | | '_ ` _ \   / _ \ / __|     | '_ \  | | | |   #
 #   \__ \ | |_) | | | | | | |_          |  _| | |    | (_| | | | | | | | |  __/ \__ \  _  | |_) | | |_| |   #
@@ -24,9 +24,10 @@
 # @ params                                                                                    #
 #   +-- avi_file:       (string) | Path to the *.avi file to split into frames.               #
 #   +-- classification: (string) | Whether the lesion imaged is B9/CA.                        #
+#   +-- layout:         (int)    | Whether the *.avi has the Start Bar at the bottom.         #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-def split_frames(avi_file, classification):
+def split_frames(avi_file, classification, layout):
     # Getting B-Modes & Elastograms
     # Origin: Bottom-Right Corner
     # AVI Dimensions --> 800 x 600
@@ -45,4 +46,4 @@ def split_frames(avi_file, classification):
     #   +-- The AVI Name comes from everything before the .avi in avi_file
     #   +-- You can get Frame # from the iterator.
 
-split_frames("../../Data/AVI/Malignant/10-58-09.avi", "Malignant")
+split_frames("../../Data/AVI/Malignant/10-58-09.avi", "Malignant", 1)
