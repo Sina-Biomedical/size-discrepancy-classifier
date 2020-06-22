@@ -19,31 +19,84 @@
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # split_frames()                                                                              #
-# Splits an *.avi file into B-Mode & Elastogram images placed in the Data > Frames directory. #
+# Splits an *.avi file into B-Mode & Elastogram frames placed in the Data > Frames directory. #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # @ params                                                                                    #
 #   +-- avi_file:       (string) | Path to the *.avi file to split into frames.               #
-#   +-- classification: (string) | Whether the lesion imaged is B9/CA.                        #
+#   +-- classification: (string) | Whether the lesion framed is B9/CA.                        #
 #   +-- layout:         (int)    | Whether the *.avi has the Start Bar at the bottom.         #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-def split_frames(avi_file, classification, layout):
-    # Getting B-Modes & Elastograms
-    # Origin: Bottom-Right Corner
-    # AVI Dimensions --> 800 x 600
-    # Strain Image
-    #   +-- Bottom-Left Corner @ (70, 230)
-    #   +-- Dimensions: 265 x 205
-    # B-Mode Image
-    #   +-- Bottom-Left Corner @ (390, 155)
-    #   +-- Dimensions: 265 x 280
+import os
+from os.path import expanduser
+import cv2
+print(cv2.__version__)
 
-    # For a given *.avi,
-    # +-- Iterate through each frame
-    # +-- Get the B-Mode & Strain from each frame using the above guidelines
-    # +-- Save the images as strain.png/bmode.png in Data > Frames > Benign/Malignant > AVI Name > Frame # > strain.png/bmode.png
-    #   +-- Use classification to determine whether to put it in Benign or Malignant
-    #   +-- The AVI Name comes from everything before the .avi in avi_file
-    #   +-- You can get Frame # from the iterator.
+def split_frames(avi_directory):
 
-split_frames("../../Data/AVI/Malignant/10-58-09.avi", "Malignant", 1)
+    # Get  from avi_directory
+    classification = 'Malignant' if avi_directory[15] == 'M' else 'Benign'
+    id = avi_directory[-8:]
+    directory_header = "../../Data/Frames/" + classification + "/" + id + "/"
+    print(directory_header)
+
+    # Split Strain --> Frames
+
+    elastogram_sequence = cv2.VideoCapture(avi_directory + "/Strain.mp4")
+    success, frame = elastogram_sequence.read()
+    count = 0
+
+    while success:
+
+        # cv2.imshow('img', frame)
+        # cv2.waitKey(0)
+
+        os.makedirs(directory_header + "/%d/" % count)
+        if not cv2.imwrite(directory_header + "/%d/strain.jpg" % count, frame):
+            raise Exception("Could not write image")
+        success, frame = elastogram_sequence.read()
+        print ('Read a new frame: ', success)
+        count += 1
+
+    # Split Bmode --> Frames
+
+    bmode_sequence = cv2.VideoCapture(avi_directory + "/Bmode.mp4")
+    success, frame = bmode_sequence.read()
+    count = 0
+
+    while success:
+
+        # cv2.imshow('img', frame)
+        # cv2.waitKey(0)
+
+        if not cv2.imwrite(directory_header + "/%d/bmode.jpg" % count, frame):
+            raise Exception("Could not write image")
+        success, frame = bmode_sequence.read()
+        print ('Read a new frame: ', success)
+        count += 1
+
+#benign
+split_frames("../../Data/AVI/Benign/07-48-22")
+split_frames("../../Data/AVI/Benign/07-53-53")
+split_frames("../../Data/AVI/Benign/09-11-35")
+split_frames("../../Data/AVI/Benign/09-12-46")
+split_frames("../../Data/AVI/Benign/09-13-35")
+split_frames("../../Data/AVI/Benign/10-44-27")
+split_frames("../../Data/AVI/Benign/10-51-35")
+split_frames("../../Data/AVI/Benign/13-53-47")
+split_frames("../../Data/AVI/Benign/13-56-04")
+split_frames("../../Data/AVI/Benign/14-13-31")
+split_frames("../../Data/AVI/Benign/14-37-20")
+
+#malignant
+split_frames("../../Data/AVI/Malignant/07-50-58")
+split_frames("../../Data/AVI/Malignant/08-28-57")
+split_frames("../../Data/AVI/Malignant/09-10-14")
+split_frames("../../Data/AVI/Malignant/09-16-04")
+split_frames("../../Data/AVI/Malignant/09-35-49")
+split_frames("../../Data/AVI/Malignant/10-22-11")
+# split_frames("../../Data/AVI/Malignant/10-58-09")
+split_frames("../../Data/AVI/Malignant/13-43-30")
+split_frames("../../Data/AVI/Malignant/13-54-36")
+split_frames("../../Data/AVI/Malignant/14-07-13")
+split_frames("../../Data/AVI/Malignant/14-21-51")
