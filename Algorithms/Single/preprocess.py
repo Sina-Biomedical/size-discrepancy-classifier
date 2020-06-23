@@ -42,7 +42,7 @@ def preprocess(image_filepath):
         image = cv2.imread(image_filepath, 0)
         blur = cv2.fastNlMeansDenoising(image, None,150,7,21)
         hist_eq = cv2.equalizeHist(blur)
-        segmented, thresh = cv2.threshold(gray,0,255,cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
+        segmented, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
 
         # blur = cv2.GaussianBlur(image, (11, 11), 0)
 
@@ -52,7 +52,7 @@ def preprocess(image_filepath):
         plt.xticks([]), plt.yticks([])
         plt.subplot(223), plt.imshow(hist_eq, 'gray'), plt.title('Hist EQ')
         plt.xticks([]), plt.yticks([])
-        plt.subplot(224), plt.imshow(cv2.fastNlMeansDenoising(image, None, 10, 19, 21)), plt.title('Blurred')
+        plt.subplot(224), plt.imshow(segmented, 'gray'), plt.title('Segmented')
         plt.xticks([]), plt.yticks([])
         # plt.subplot(125), plt.imshow(cv2.fastNlMeansDenoising(image, None,30,7,21)), plt.title('Blurred')
         # plt.xticks([]), plt.yticks([])
