@@ -27,8 +27,6 @@
 #   +-- layout:         (int)    | Whether the *.avi has the Start Bar at the bottom.         #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import os
-from os.path import expanduser
 import cv2
 print(cv2.__version__)
 
