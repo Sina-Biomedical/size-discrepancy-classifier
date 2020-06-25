@@ -40,7 +40,7 @@ def on_mouse(event, x, y, flags, params):
 
 def preprocess(image_filepath, image_type):
     image = cv2.imread(image_filepath, 0)
-    image = cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
+    # image = cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
     # cv2.imshow('Original Image', orginalImg)
     kernel = np.ones((9, 9), np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=1)

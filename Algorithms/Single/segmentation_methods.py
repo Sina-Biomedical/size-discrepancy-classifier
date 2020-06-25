@@ -43,7 +43,11 @@ def RegionGrowing(image, portion, epsilon):
         ycd = portion[0][1]
         for i in range(-1, 2):
             for j in range(-1, 2):
-                absDiff = abs(int(cen_pix) - int(image[xcd + i][ycd + j]))
+                try:
+                    absDiff = abs(int(cen_pix) - int(image[xcd + i][ycd + j]))
+                except:
+                    print("RegionGrowing couldn't segment the image!")
+                    break
                 if (i != 0 or j != 0) and output[xcd + i][ycd + j] != 255 and absDiff < epsilon:
                     output[xcd + i][ycd + j] = 255
                     portion.append([xcd + i, ycd + j])
