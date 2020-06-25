@@ -29,13 +29,16 @@
 
 def classify_lesion(image_directory):
 
-    # Define threshold, to be determined using an SVM trained on the area ratios of the entire dataset.
-    threshold = 2.5
+    # # Define threshold, to be determined using an SVM trained on the area ratios of the entire dataset.
+    # threshold = 2.5
+    #
+    # # Compute the ratio between the area of a lesion in the b-mode and strain image pair @ compare_area.py
+    # area_ratio = compare_area(image_directory)
 
-    # Compute the ratio between the area of a lesion in the b-mode and strain image pair @ compare_area.py
-    area_ratio = compare_area(image_directory)
+    # Pass images to model
+    # Model evaluates if its malignant
 
-    # Determine if the lesion is malignant or benign using the ML-determined threshold
-    is_malignant = area_ratio > threshold
+    # # Determine if the lesion is malignant or benign using the ML-determined threshold
+    # is_malignant = area_ratio > threshold
 
     return is_malignant
