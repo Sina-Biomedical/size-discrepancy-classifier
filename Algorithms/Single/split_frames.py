@@ -28,52 +28,43 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import cv2
-print(cv2.__version__)
+import os
 
 def split_frames(avi_directory):
 
-    # Get  from avi_directory
+    # Get from avi_directory
     classification = 'Malignant' if avi_directory[15] == 'M' else 'Benign'
     id = avi_directory[-8:]
-    directory_header = "../../Data/Frames/" + classification + "/" + id + "/"
+    directory_header = "../../Data/Frames/" + classification + "/" + id # "../../Data/AVI/Benign/07-48-22" --> "../../Data/Frames/Benign/07-48-22"
     print(directory_header)
 
     # Split Strain --> Frames
 
-    elastogram_sequence = cv2.VideoCapture(avi_directory + "/Strain.mp4")
+    elastogram_sequence = cv2.VideoCapture(avi_directory + "/Strain.AVI")
     success, frame = elastogram_sequence.read()
     count = 0
 
     while success:
 
-        # cv2.imshow('img', frame)
-        # cv2.waitKey(0)
-
-        os.makedirs(directory_header + "/%d/" % count)
-        if not cv2.imwrite(directory_header + "/%d/strain.jpg" % count, frame):
+        os.makedirs(directory_header + "/%d/" % count) # "../../Data/Frames/Benign/07-48-22/0/"
+        if not cv2.imwrite(directory_header + "/%d/strain.jpg" % count, frame): # "../../Data/Frames/Benign/07-48-22/0/strain.jpg"
             raise Exception("Could not write image")
         success, frame = elastogram_sequence.read()
         print ('Read a new frame: ', success)
         count += 1
 
-    # Split Bmode --> Frames
-
-    bmode_sequence = cv2.VideoCapture(avi_directory + "/Bmode.mp4")
+    bmode_sequence = cv2.VideoCapture(avi_directory + "/Bmode.AVI")
     success, frame = bmode_sequence.read()
     count = 0
 
     while success:
-
-        # cv2.imshow('img', frame)
-        # cv2.waitKey(0)
-
         if not cv2.imwrite(directory_header + "/%d/bmode.jpg" % count, frame):
             raise Exception("Could not write image")
         success, frame = bmode_sequence.read()
         print ('Read a new frame: ', success)
         count += 1
 
-#benign
+# Benign
 split_frames("../../Data/AVI/Benign/07-48-22")
 split_frames("../../Data/AVI/Benign/07-53-53")
 split_frames("../../Data/AVI/Benign/09-11-35")
@@ -93,7 +84,7 @@ split_frames("../../Data/AVI/Malignant/09-10-14")
 split_frames("../../Data/AVI/Malignant/09-16-04")
 split_frames("../../Data/AVI/Malignant/09-35-49")
 split_frames("../../Data/AVI/Malignant/10-22-11")
-# split_frames("../../Data/AVI/Malignant/10-58-09")
+split_frames("../../Data/AVI/Malignant/10-58-09")
 split_frames("../../Data/AVI/Malignant/13-43-30")
 split_frames("../../Data/AVI/Malignant/13-54-36")
 split_frames("../../Data/AVI/Malignant/14-07-13")

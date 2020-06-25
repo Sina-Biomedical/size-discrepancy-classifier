@@ -31,34 +31,32 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-def preprocess(image_filepath):
+clicks = []
 
-    # Determine whether image is elastogram or B-Mode image
-    type = 'strain' if image_filepath[-5:] == 'n.jpg' else 'bmode'
+def on_mouse(event, x, y, flags, params):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        print('Seed: ' + str(x) + ', ' + str(y))
+    clicks.append((y, x))
 
-    if type == 'bmode':
-        pass
-    elif type == 'strain':
-        image = cv2.imread(image_filepath, 0)
-        blur = cv2.fastNlMeansDenoising(image, None,150,7,21)
-        hist_eq = cv2.equalizeHist(blur)
-        segmented, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+def preprocess(image_filepath, image_type):
+    image = cv2.imread(image_filepath, 0)
+    # cv2.imshow('Original Image', orginalImg)
+    kernel = np.ones((9, 9), np.uint8)
+    image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=1)
+    image = cv2.medianBlur(image, 19)
+    cv2.namedWindow('Input')
+    cv2.setMouseCallback('Input', on_mouse, 0, )
+    cv2.imshow('Input', image)
+    cv2.waitKey()
+    seed = clicks[-1]
+    x = seed[0]
+    y = seed[1]
+    rows = image.shape[0]
+    cols = image.shape[1]
+    # Find the center
+    cen_pix = image[x][y]
+    # New matrix that will hold segmented image
+    # Matrix to hold all region pixels
+    portion = [[x, y]]
 
-        # blur = cv2.GaussianBlur(image, (11, 11), 0)
-
-        plt.subplot(221), plt.imshow(image, 'gray'), plt.title('Original')
-        plt.xticks([]), plt.yticks([])
-        plt.subplot(222), plt.imshow(blur, 'gray'), plt.title('Blurred')
-        plt.xticks([]), plt.yticks([])
-        plt.subplot(223), plt.imshow(hist_eq, 'gray'), plt.title('Hist EQ')
-        plt.xticks([]), plt.yticks([])
-        plt.subplot(224), plt.imshow(segmented, 'gray'), plt.title('Segmented')
-        plt.xticks([]), plt.yticks([])
-        # plt.subplot(125), plt.imshow(cv2.fastNlMeansDenoising(image, None,30,7,21)), plt.title('Blurred')
-        # plt.xticks([]), plt.yticks([])
-        # plt.subplot(126), plt.imshow(cv2.fastNlMeansDenoising(image, None,50,7,21)), plt.title('Blurred')
-        # plt.xticks([]), plt.yticks([])
-        plt.show()
-
-
-preprocess("../../Data/Frames/Malignant/10-58-09/234/strain.jpg")
+    return(image, portion)
