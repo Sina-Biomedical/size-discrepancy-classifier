@@ -38,8 +38,10 @@ def on_mouse(event, x, y, flags, params):
         print('Seed: ' + str(x) + ', ' + str(y))
     mouse_clicks.append((y, x))
 
-def preprocess(image_filepath, image_type):
+def preprocess(image_filepath):
+
     image = cv2.imread(image_filepath, 0)
+    image_type = "strain" if image_filepath[-5:] == "n.jpg" else "bmode"
 
     if image_type == "strain":
         # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
