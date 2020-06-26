@@ -36,8 +36,10 @@
 # 6. Refining Seed Point
 # 7. Seed Point Display/Return
 
-from preprocessing_methods import preprocess
 import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+from preprocessing_methods import preprocess
 
 def select_seed(image_filepath):
 
@@ -47,9 +49,21 @@ def select_seed(image_filepath):
     processed_image, _ = preprocess(image_filepath)
 
     if image_type == "strain":
-        _, binarized_image = cv2.threshold(processed_image, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        cv2.imshow('Otsu Threshold', binarized_image)
-        cv2.waitKey()
+        ret,thresh1 = cv2.threshold(processed_image,127,255,cv2.THRESH_BINARY)
+        ret,thresh2 = cv2.threshold(processed_image,127,255,cv2.THRESH_BINARY_INV)
+        ret,thresh3 = cv2.threshold(processed_image,127,255,cv2.THRESH_TRUNC)
+        ret,thresh4 = cv2.threshold(processed_image,127,255,cv2.THRESH_TOZERO)
+        ret,thresh5 = cv2.threshold(processed_image,127,255,cv2.THRESH_TOZERO_INV)
+
+        titles = ['Original Image','BINARY','BINARY_INV','TRUNC','TOZERO','TOZERO_INV']
+        images = [processed_image, thresh1, thresh2, thresh3, thresh4, thresh5]
+
+        for i in range(6):
+            plt.subplot(2,3,i+1), plt.imshow(images[i],'gray')
+            plt.title(titles[i])
+            plt.xticks([]),plt.yticks([])
+
+        plt.show()
 
     else:
         pass
