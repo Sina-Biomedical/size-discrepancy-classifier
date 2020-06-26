@@ -50,17 +50,13 @@ def select_seed(image_filepath):
 
     if image_type == "strain":
         threshold = 70
-        ret,thresh1 = cv2.threshold(processed_image,threshold,255,cv2.THRESH_BINARY)
-        ret,thresh2 = cv2.threshold(processed_image,threshold,255,cv2.THRESH_BINARY_INV)
-        ret,thresh3 = cv2.threshold(processed_image,threshold,255,cv2.THRESH_TRUNC)
-        ret,thresh4 = cv2.threshold(processed_image,threshold,255,cv2.THRESH_TOZERO)
-        ret,thresh5 = cv2.threshold(processed_image,threshold,255,cv2.THRESH_TOZERO_INV)
+        _, binarized_image = cv2.threshold(processed_image, threshold, 255, cv2.THRESH_BINARY_INV)
 
-        titles = ['Original Image','BINARY','BINARY_INV','TRUNC','TOZERO','TOZERO_INV']
-        images = [processed_image, thresh1, thresh2, thresh3, thresh4, thresh5]
+        titles = ['Processed Image', 'Binarized Image']
+        figures = [processed_image, binarized_image]
 
-        for i in range(6):
-            plt.subplot(2,3,i+1), plt.imshow(images[i],'gray')
+        for i in range(len(figures)):
+            plt.subplot(2,3,i+1), plt.imshow(figures[i],'gray')
             plt.title(titles[i])
             plt.xticks([]),plt.yticks([])
 
