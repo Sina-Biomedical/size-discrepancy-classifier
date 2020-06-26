@@ -31,33 +31,44 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-clicks = []
+mouse_clicks = []
 
 def on_mouse(event, x, y, flags, params):
     if event == cv2.EVENT_LBUTTONDOWN:
         print('Seed: ' + str(x) + ', ' + str(y))
-    clicks.append((y, x))
+    mouse_clicks.append((y, x))
 
 def preprocess(image_filepath, image_type):
     image = cv2.imread(image_filepath, 0)
-    # image = cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
-    # cv2.imshow('Original Image', orginalImg)
+    # Crop Image
+    processed_image = image[0:470, 100:700]
+    processed_image = cv2.resize(processed_image, (0,0), fx=0.5, fy=0.5)
     kernel = np.ones((9, 9), np.uint8)
-    image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=1)
-    image = cv2.medianBlur(image, 19)
+    processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=1)
+    # image = cv2.medianBlur(image, 59)
+    # image = cv2.bilateralFilter(image,79,75,75)
+    processed_image = cv2.fastNlMeansDenoising(processed_image, None, 10, 7, 1)
+    processed_image = cv2.medianBlur(processed_image, 59)
+    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    # image = clahe.apply(image)
+
+    plt.subplot(121), plt.imshow(image, cmap='gray'), plt.title('Original Image')
+    plt.subplot(122), plt.imshow(processed_image, cmap='gray'), plt.title('Processed Image')
+    plt.show()
+
     cv2.namedWindow('Input')
     cv2.setMouseCallback('Input', on_mouse, 0, )
-    cv2.imshow('Input', image)
+    cv2.imshow('Input', processed_image)
     cv2.waitKey()
-    seed = clicks[-1]
-    x = seed[0]
-    y = seed[1]
-    rows = image.shape[0]
-    cols = image.shape[1]
+    seed = mouse_clicks[-1]
+    seed_x = seed[0]
+    seed_y = seed[1]
+    rows = processed_image.shape[0]
+    cols = processed_image.shape[1]
     # Find the center
-    cen_pix = image[x][y]
+    cen_pix = processed_image[seed_x][seed_y]
     # New matrix that will hold segmented image
     # Matrix to hold all region pixels
-    portion = [[x, y]]
+    portion = [[seed_x, seed_y]]
 
-    return(image, portion)
+    return(processed_image, portion)
