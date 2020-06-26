@@ -41,28 +41,31 @@ def on_mouse(event, x, y, flags, params):
 def preprocess(image_filepath, image_type):
     image = cv2.imread(image_filepath, 0)
 
-    # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
-    processed_image = image[0:470, 100:700]
+    if image_type == "strain":
+        # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
+        processed_image = image[0:470, 100:700]
 
-    # IMAGE RESIZING // 0.5
-    processed_image = cv2.resize(processed_image, (0,0), fx=0.5, fy=0.5)
+        # IMAGE RESIZING // 0.5
+        processed_image = cv2.resize(processed_image, (0,0), fx=0.5, fy=0.5)
 
-    # MORPHOLOGICAL CLOSING // 11
-    kernel = np.ones((11, 11), np.uint8)
-    processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=1)
+        # MORPHOLOGICAL CLOSING // 11
+        kernel = np.ones((11, 11), np.uint8)
+        processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-    # BILATERIAL FILTER // 79
-    # image = cv2.bilateralFilter(image,79,75,75)
+        # BILATERIAL FILTER // 79
+        # image = cv2.bilateralFilter(image,79,75,75)
 
-    # NLM DENOISING // 10
-    processed_image = cv2.fastNlMeansDenoising(processed_image, None, 10, 7, 1)
+        # NLM DENOISING // 10
+        processed_image = cv2.fastNlMeansDenoising(processed_image, None, 10, 7, 1)
 
-    # MEDIAN BLURRING // 59
-    processed_image = cv2.medianBlur(processed_image, 59)
+        # MEDIAN BLURRING // 59
+        processed_image = cv2.medianBlur(processed_image, 59)
 
-    # ADAPTIVE HISTOGRAM EQUALIZATION // 2.0
-    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    # image = clahe.apply(image)
+        # ADAPTIVE HISTOGRAM EQUALIZATION // 2.0
+        # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        # image = clahe.apply(image)
+    else:
+        processed_image = image
 
     plt.subplot(121), plt.imshow(image, cmap='gray'), plt.title('Original Image')
     plt.subplot(122), plt.imshow(processed_image, cmap='gray'), plt.title('Processed Image')
