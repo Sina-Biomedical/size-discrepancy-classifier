@@ -49,6 +49,7 @@ def select_seed(image_filepath):
     if image_type == "strain":
         _, binarized_image = cv2.threshold(processed_image, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         cv2.imshow('Otsu Threshold', binarized_image)
+        cv2.waitKey()
 
     else:
         pass
