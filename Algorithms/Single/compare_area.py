@@ -35,8 +35,8 @@ def compare_area(image_directory):
     bmode_image = image_directory + "bmode.jpg"
 
     # Pre-process images @ preprocess.py
-    strain_image, strain_region = preprocess(strain_image, 'strain')
-    bmode_image, bmode_region = preprocess(bmode_image, 'b-mode')
+    strain_image, strain_region = preprocess(strain_image)
+    bmode_image, bmode_region = preprocess(bmode_image)
 
     # Segment images @ segment.py
     strain_segmented = segment(strain_image, strain_region, 'strain', 60)
