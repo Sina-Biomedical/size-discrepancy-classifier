@@ -27,6 +27,10 @@
 #   +-- area_ratio:      (double) | the area ratio between strain and b-mode masks.           #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
 from preprocessing_methods import preprocess
 from segmentation_methods import segment
 
@@ -35,12 +39,18 @@ def compare_area(image_directory):
     bmode_image = image_directory + "bmode.jpg"
 
     # Pre-process images @ preprocess.py
-    strain_image, strain_region = preprocess(strain_image)
-    bmode_image, bmode_region = preprocess(bmode_image)
+    strain_image_processed = preprocess(strain_image)
+    bmode_image_processed = preprocess(bmode_image)
 
     # Segment images @ segment.py
-    strain_segmented = segment(strain_image, strain_region, 'strain', 60)
-    bmode_segmented = segment(bmode_image, bmode_region, 'b-mode', 60)
+    strain_segmented = segment(strain_image_processed, 'strain', 84)
+    bmode_segmented = segment(bmode_image_processed, 'b-mode', 84)
+
+    plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
+    plt.subplot(222), plt.imshow(strain_segmented, cmap='gray')
+    plt.subplot(223), plt.imshow(cv2.imread(bmode_image), cmap='gray')
+    plt.subplot(224), plt.imshow(bmode_segmented, cmap='gray')
+    plt.show()
 
     # # Compute the area ratio from the images
     # strain_area = sum(strain_segmented)

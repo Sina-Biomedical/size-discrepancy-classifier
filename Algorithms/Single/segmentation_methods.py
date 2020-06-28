@@ -31,45 +31,27 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-def RegionGrowing(image, portion, epsilon):
-    x = portion[0][0]
-    y = portion[0][1]
-    cen_pix = image[x][y]
+def segment(image, type, binarize_threshold):
 
-    output = np.zeros(np.shape(image), dtype=np.uint8)
-    output[x][y] = 255
-    while len(portion) > 0:
-        xcd = portion[0][0]
-        ycd = portion[0][1]
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                try:
-                    absDiff = abs(int(cen_pix) - int(image[xcd + i][ycd + j]))
-                except:
-                    print("RegionGrowing couldn't segment the image!")
-                    break
-                if (i != 0 or j != 0) and output[xcd + i][ycd + j] != 255 and absDiff < epsilon:
-                    output[xcd + i][ycd + j] = 255
-                    portion.append([xcd + i, ycd + j])
-        portion.pop(0)
-    return output
+    _, binarized_image = cv2.threshold(image, binarize_threshold, 255, cv2.THRESH_BINARY_INV)
 
-def RemoveUnwantedRegions(output):
-    new_img = np.zeros_like(output)
-    for val in np.unique(output)[1:]:
-        mask = np.uint8(output == val)  # step 3
-        labels, stats = cv2.connectedComponentsWithStats(mask, 5)[1:3]
-        largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-        new_img[labels == largest_label] = val
-    return new_img
+    kernel = np.ones((3, 3), np.uint8)
+    opening = cv2.morphologyEx(binarized_image, cv2.MORPH_OPEN, kernel, iterations = 2)
 
-def segment(image, portion, type, epsilon):
-    RG = RegionGrowing(image, portion, epsilon)
-    kernel = np.ones((19, 19), np.uint8)
-    RG = cv2.morphologyEx(RG, cv2.MORPH_CLOSE, kernel, iterations=2)
-    # Removing small regions that are not a part of lesion like corners
-    segmented_image = RemoveUnwantedRegions(RG)
-    cv2.imshow('Output', segmented_image)
-    cv2.waitKey()
+    sure_bg = cv2.dilate(opening, kernel, iterations=3)
+    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+    _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
 
-    return segmented_image
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(sure_bg, sure_fg)
+
+    _, markers = cv2.connectedComponents(sure_fg)
+    markers = markers + 1
+    markers[unknown == 255] = 0
+
+    output_image = image
+
+    markers = cv2.watershed(cv2.cvtColor(image, cv2.COLOR_GRAY2RGB), markers)
+    output_image[markers == -1] = 255
+
+    return output_image
