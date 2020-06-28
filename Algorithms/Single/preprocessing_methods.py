@@ -47,8 +47,8 @@ def preprocess(image_filepath):
         # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
         processed_image = image[0:470, 100:700]
 
-        # IMAGE RESIZING // 0.5
-        processed_image = cv2.resize(processed_image, (0,0), fx=0.5, fy=0.5)
+        # IMAGE RESIZING // 0.4
+        processed_image = cv2.resize(processed_image, (0,0), fx=0.4, fy=0.4)
 
         # MORPHOLOGICAL CLOSING // 11
         kernel = np.ones((11, 11), np.uint8)
