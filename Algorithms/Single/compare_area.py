@@ -45,7 +45,7 @@ def compare_area(image_directory):
     # Segment Images @ segment.py
     strain_segmented,_ = segment(strain_image_processed, 'strain', 84)
     strain_area = np.sum(strain_segmented == 255)
-    bmode_segmented,_ = segment(bmode_image_processed, 'b-mode', 84)
+    bmode_segmented,_ = segment(bmode_image_processed, 'b-mode', 210)
     bmode_area = np.sum(bmode_segmented == 255)
 
     plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
