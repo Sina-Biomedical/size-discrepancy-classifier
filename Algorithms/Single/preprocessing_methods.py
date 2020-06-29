@@ -31,13 +31,6 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-mouse_clicks = []
-
-def on_mouse(event, x, y, flags, params):
-    if event == cv2.EVENT_LBUTTONDOWN:
-        print('Seed: ' + str(x) + ', ' + str(y))
-    mouse_clicks.append((y, x))
-
 # Best Image --> As close to a completely black lesion and completely white and uniform surrounding as possible.
 # *NOTE* More important than retaining the shape of the lesion is retaining the size of the lesion.
 
@@ -58,7 +51,7 @@ def preprocess(image_filepath):
         processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=1)
 
         # BILATERIAL FILTER // 79
-        # image = cv2.bilateral/Filter(image,79,75,75)
+        # i3mage = cv2.bilateral/Filter(image,79,75,75)
 
         # NLM DENOISING // 10
         processed_image = cv2.fastNlMeansDenoising(processed_image, None, 10, 7, 1)
@@ -72,7 +65,7 @@ def preprocess(image_filepath):
     else:
 
         # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
-        processed_image = image[0:595, 100:700]
+        processed_image = image[0:600, 100:700]
 
         # IMAGE RESIZING // 0.4
         # processed_image = cv2.resize(processed_image, (0,0), fx=0.4, fy=0.4)

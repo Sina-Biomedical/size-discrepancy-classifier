@@ -31,27 +31,57 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-def segment(image, type, binarize_threshold):
+def fill_contours(arr):
+    return np.maximum.accumulate(arr,1) & \
+           np.maximum.accumulate(arr[:,::-1],1)[:,::-1]
 
-    _, binarized_image = cv2.threshold(image, binarize_threshold, 255, cv2.THRESH_BINARY_INV)
+def segment(image, image_type, binarize_threshold):
 
-    kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(binarized_image, cv2.MORPH_OPEN, kernel, iterations = 2)
+    if image_type == 'strain':
+        _, binarized_image = cv2.threshold(image, binarize_threshold, 255, cv2.THRESH_BINARY_INV)
 
-    sure_bg = cv2.dilate(opening, kernel, iterations=3)
-    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
-    _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
+        kernel = np.ones((3, 3), np.uint8)
+        opening = cv2.morphologyEx(binarized_image, cv2.MORPH_OPEN, kernel, iterations = 2)
 
-    sure_fg = np.uint8(sure_fg)
-    unknown = cv2.subtract(sure_bg, sure_fg)
+        sure_bg = cv2.dilate(opening, kernel, iterations=3)
+        dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+        _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
 
-    _, markers = cv2.connectedComponents(sure_fg)
-    markers = markers + 1
-    markers[unknown == 255] = 0
+        sure_fg = np.uint8(sure_fg)
+        unknown = cv2.subtract(sure_bg, sure_fg)
 
-    output_image = image
+        _, markers = cv2.connectedComponents(sure_fg)
+        markers = markers + 1
+        markers[unknown == 255] = 0
 
-    markers = cv2.watershed(cv2.cvtColor(image, cv2.COLOR_GRAY2RGB), markers)
-    output_image[markers == -1] = 255
+        output_image = image
 
-    return output_image
+        markers = cv2.watershed(cv2.cvtColor(image, cv2.COLOR_GRAY2RGB), markers)
+        binarized_image = fill_contours(markers)
+        output_image[markers == -1] = 255
+
+        return output_image, np.pad(np.resize(binarized_image, (tuple(int(float(i) * 2.5) for i in binarized_image.shape))), [(0, 130), (100, 100)], mode='constant', constant_values=0)
+    else:
+        _, binarized_image = cv2.threshold(image, binarize_threshold, 255, cv2.THRESH_BINARY_INV)
+
+        kernel = np.ones((3, 3), np.uint8)
+        opening = cv2.morphologyEx(binarized_image, cv2.MORPH_OPEN, kernel, iterations = 2)
+
+        sure_bg = cv2.dilate(opening, kernel, iterations=3)
+        dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+        _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
+
+        sure_fg = np.uint8(sure_fg)
+        unknown = cv2.subtract(sure_bg, sure_fg)
+
+        _, markers = cv2.connectedComponents(sure_fg)
+        markers = markers + 1
+        markers[unknown == 255] = 0
+
+        output_image = image
+
+        markers = cv2.watershed(cv2.cvtColor(image, cv2.COLOR_GRAY2RGB), markers)
+        binarized_image = fill_contours(markers)
+        output_image[markers == -1] = 255
+
+        return output_image, np.pad(binarized_image, [(0, 0), (100, 100)], mode='constant', constant_values=0)
