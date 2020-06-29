@@ -5,7 +5,7 @@ import copy
 
 def find_halo(image_src):
     gray = image_src
-    ret, gray = cv2.threshold(gray, 250,255,0)
+    ret, gray = cv2.threshold(gray, 64,255,0)
 
     contours, hierarchy = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     largest_area = sorted(contours, key=cv2.contourArea)[-1]
@@ -14,6 +14,9 @@ def find_halo(image_src):
     dst = cv2.bitwise_and(image_src, mask)
     mask = 255 - mask
     roi = cv2.add(dst, mask)
+
+    plt.subplot(221), plt.imshow(roi, cmap='gray')
+    plt.show()
 
     roi_gray = roi
     ret, gray = cv2.threshold(roi_gray, 250,255,0)
@@ -33,10 +36,6 @@ def find_halo(image_src):
             max_y = max(y+h, max_y)
 
     roi = roi[min_y:max_y, min_x:max_x]
-    cv2.imshow(roi, cmap='gray')
-    cv2.waitkey()
-    # plt.subplot(221), plt.imshow(roi, cmap='gray')
-    # plt.show()
 
 from preprocessing_methods import preprocess
 
