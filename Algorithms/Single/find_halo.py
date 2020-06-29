@@ -3,9 +3,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 import copy
 
-def find_halo(image_src):
+def find_halo(image_src, threshold):
     gray = image_src
-    ret, gray = cv2.threshold(gray, 64,255,0)
+    ret, gray = cv2.threshold(gray, threshold, 255, 0)
 
     contours, hierarchy = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     largest_area = sorted(contours, key=cv2.contourArea)[-1]
@@ -19,7 +19,7 @@ def find_halo(image_src):
     plt.show()
 
     roi_gray = roi
-    ret, gray = cv2.threshold(roi_gray, 250,255,0)
+    ret, gray = cv2.threshold(roi_gray, threshold, 255, 0)
     contours, hierarchy = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     max_x = 0
@@ -39,4 +39,4 @@ def find_halo(image_src):
 
 from preprocessing_methods import preprocess
 
-find_halo(preprocess("../../Data/Frames/Malignant/10-58-09/234/bmode.jpg"))
+find_halo(preprocess("../../Data/Frames/Malignant/10-58-09/234/bmode.jpg"), 180)
