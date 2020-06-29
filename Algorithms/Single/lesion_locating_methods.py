@@ -15,8 +15,8 @@ def find_lesion(image_src, threshold_1, threshold_2):
     mask = 255 - mask
     roi = cv2.add(dst, mask)
 
-    plt.imshow(roi, cmap='gray')
-    plt.show()
+    # plt.imshow(roi, cmap='gray')
+    # plt.show()
 
     roi_gray = roi
     ret, gray = cv2.threshold(roi_gray, threshold_2, 255, 0)
@@ -36,5 +36,8 @@ def find_lesion(image_src, threshold_1, threshold_2):
             max_y = max(y+h, max_y)
 
     roi = roi[min_y:max_y, min_x:max_x]
+
+    # plt.imshow(roi, cmap='gray')
+    # plt.show()
 
     return roi

@@ -60,7 +60,9 @@ def segment(image, image_type, binarize_threshold):
         binarized_image = fill_contours(markers)
         output_image[markers == -1] = 255
 
-        return output_image, np.pad(np.resize(binarized_image, (tuple(int(float(i) * 2.5) for i in binarized_image.shape))), [(0, 130), (100, 100)], mode='constant', constant_values=0)
+        strain_area = np.sum(binarized_image == 255) * 6.25
+
+        return strain_area, np.pad(cv2.resize(output_image, (0,0), fx=2.5, fy=2.5), [(0, 130), (100, 100)], mode='constant', constant_values=0), np.pad(np.resize(binarized_image, (tuple(int(float(i) * 2.5) for i in binarized_image.shape))), [(0, 130), (100, 100)], mode='constant', constant_values=0)
     else:
         _, binarized_image = cv2.threshold(image, binarize_threshold, 255, cv2.THRESH_BINARY_INV)
 
@@ -84,4 +86,6 @@ def segment(image, image_type, binarize_threshold):
         binarized_image = fill_contours(markers)
         output_image[markers == -1] = 255
 
-        return output_image, np.pad(binarized_image, [(0, 0), (100, 100)], mode='constant', constant_values=0)
+        bmode_area = np.sum(binarized_image == 255)
+
+        return bmode_area, output_image, np.pad(binarized_image, [(0, 0), (100, 100)], mode='constant', constant_values=0)

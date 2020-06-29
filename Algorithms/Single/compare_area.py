@@ -42,11 +42,18 @@ def compare_area(image_directory):
     strain_image_processed = preprocess(strain_image)
     bmode_image_processed = preprocess(bmode_image)
 
+    plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
+    plt.subplot(222), plt.imshow(strain_image_processed, cmap='gray')
+    plt.subplot(223), plt.imshow(cv2.imread(bmode_image), cmap='gray')
+    plt.subplot(224), plt.imshow(bmode_image_processed, cmap='gray')
+    plt.show()
+
     # Segment Images @ segment.py
-    strain_segmented,_ = segment(strain_image_processed, 'strain', 84)
-    strain_area = np.sum(strain_segmented == 255)
-    bmode_segmented,_ = segment(bmode_image_processed, 'b-mode', 210)
-    bmode_area = np.sum(bmode_segmented == 255)
+    strain_area, strain_segmented,_ = segment(strain_image_processed, 'strain', 84)
+    bmode_area, bmode_segmented,_ = segment(bmode_image_processed, 'b-mode', 212)
+
+    print("Strain Area: " + str(strain_area))
+    print("B-Mode Area: " + str(bmode_area))
 
     plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
     plt.subplot(222), plt.imshow(strain_segmented, cmap='gray')
@@ -62,4 +69,4 @@ def compare_area(image_directory):
     # return area_ratio
 
 # 10/58/09 | 234th Frame
-compare_area("../../Data/Frames/Malignant/10-58-09/234/")
+compare_area("../../Data/Frames/Malignant/10-58-09/235/")
