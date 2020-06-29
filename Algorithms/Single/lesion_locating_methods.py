@@ -3,9 +3,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 import copy
 
-def find_halo(image_src, threshold):
+def find_lesion(image_src, threshold_1, threshold_2):
     gray = image_src
-    ret, gray = cv2.threshold(gray, threshold, 255, 0)
+    ret, gray = cv2.threshold(gray, threshold_1, 255, 0)
 
     contours, hierarchy = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     largest_area = sorted(contours, key=cv2.contourArea)[-1]
@@ -15,11 +15,11 @@ def find_halo(image_src, threshold):
     mask = 255 - mask
     roi = cv2.add(dst, mask)
 
-    plt.subplot(221), plt.imshow(roi, cmap='gray')
+    plt.imshow(roi, cmap='gray')
     plt.show()
 
     roi_gray = roi
-    ret, gray = cv2.threshold(roi_gray, threshold, 255, 0)
+    ret, gray = cv2.threshold(roi_gray, threshold_2, 255, 0)
     contours, hierarchy = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     max_x = 0
@@ -37,6 +37,4 @@ def find_halo(image_src, threshold):
 
     roi = roi[min_y:max_y, min_x:max_x]
 
-from preprocessing_methods import preprocess
-
-find_halo(preprocess("../../Data/Frames/Malignant/10-58-09/234/bmode.jpg"), 180)
+    return roi

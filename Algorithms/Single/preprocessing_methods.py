@@ -31,6 +31,8 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
+from lesion_locating_methods import find_lesion
+
 # Best Image --> As close to a completely black lesion and completely white and uniform surrounding as possible.
 # *NOTE* More important than retaining the shape of the lesion is retaining the size of the lesion.
 
@@ -64,7 +66,7 @@ def preprocess(image_filepath):
         # image = clahe.apply(image)
     else:
 
-        # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
+         # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
         processed_image = image[0:600, 100:700]
 
         # IMAGE RESIZING // 0.4
@@ -89,5 +91,9 @@ def preprocess(image_filepath):
 
         # HISTOGRAM EQUALIZATION -- Intensifies/Increases Contrast
         processed_image = cv2.equalizeHist(processed_image)
+
+        processed_image = find_lesion(processed_image, 193, 194)
+
+        # processed_image = cv2.equalizeHist(processed_image)
 
     return processed_image
