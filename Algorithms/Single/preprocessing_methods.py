@@ -52,25 +52,13 @@ def preprocess(image_filepath):
         kernel = np.ones((12, 12), np.uint8)
         processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-        # BILATERIAL FILTER // 79
-        # i3mage = cv2.bilateral/Filter(image,79,75,75)
-
-        # NLM DENOISING // 10
-        processed_image = cv2.fastNlMeansDenoising(processed_image, None, 10, 7, 1)
-
         # MEDIAN BLURRING // 59
         processed_image = cv2.medianBlur(processed_image, 59)
 
-        # ADAPTIVE HISTOGRAM EQUALIZATION // 2.0
-        # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        # image = clahe.apply(image)
     else:
 
          # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
         processed_image = image[0:600, 100:700]
-
-        # IMAGE RESIZING // 0.4
-        # processed_image = cv2.resize(processed_image, (0,0), fx=0.4, fy=0.4)
 
         # MORPHOLOGICAL CLOSING // 11
         kernel = np.ones((13, 13), np.uint8)
@@ -82,18 +70,13 @@ def preprocess(image_filepath):
         # HISTOGRAM EQUALIZATION -- Intensifies/Increases Contrast
         processed_image = cv2.equalizeHist(processed_image)
 
-        # # NLM DENOISING // 10 -- Denoise
-        # processed_image = cv2.fastNlMeansDenoising(processed_image, None, 50, 7, 1)
-
         # # MEDIAN BLURRING // 59 -- Denoise
         processed_image = cv2.medianBlur(processed_image, 25)
-
 
         # HISTOGRAM EQUALIZATION -- Intensifies/Increases Contrast
         processed_image = cv2.equalizeHist(processed_image)
 
+        # ISOLATE LESION USING HALO
         processed_image = find_lesion(processed_image, 193, 194)
-
-        # processed_image = cv2.equalizeHist(processed_image)
 
     return processed_image
