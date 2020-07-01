@@ -38,7 +38,7 @@
 # CLOSE ITERS.    # 1                   # STRAIN      #
 # MED. BLURRING   # 59                  # STRAIN      #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# IMAGE CROPPING  # [0, 470][100,700]   # B-MODE      #
+# IMAGE CROPPING  # [0, 600] [100, 700] # B-MODE      #
 # CLOSE SIZE      # 13                  # B-MODE      #
 # CLOSE ITERS.    # 1                   # B-MODE      #
 # BILAT. FILTER   # 13                  # B-MODE      #
@@ -50,11 +50,9 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # HYPERPARAMETER  #        VALUE        # IMAGE TYPE  #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# THRESHOLD 1     # 193                 # STRAIN      #
-# THRESHOLD 2     # 194                 # STRAIN      #
+# BIN. THRESHOLD  # 193                 # STRAIN      #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# THRESHOLD 1     # 193                 # B-MODE      #
-# THRESHOLD 2     # 194                 # B-MODE      #
+# BIN. THRESHOLD  # 193                 # B-MODE      #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -74,7 +72,7 @@
 # OPEN ITERATIONS # 2                    # B-MODE     #
 # DIL. ITERATIONS # 3                    # B-MODE     #
 # DIST TRANSFORM  # 5                    # B-MODE     #
-# FOREGR. THRESH. # 0.7                  # B-MODE     #
+# FG. THRESH.     # 0.7                  # B-MODE     #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import cv2
@@ -84,13 +82,13 @@ from matplotlib import pyplot as plt
 from preprocessing_methods import preprocess
 from segmentation_methods import segment
 
-def compare_area(image_directory):
+def compare_area(image_directory, hyperparameters):
     strain_image = image_directory + "strain.jpg"
     bmode_image = image_directory + "bmode.jpg"
 
     # Pre-Process Images @ preprocess.py
-    strain_image_processed = preprocess(strain_image)
-    bmode_image_processed = preprocess(bmode_image)
+    strain_image_processed = preprocess(strain_image, hyperparameters)
+    bmode_image_processed = preprocess(bmode_image, hyperparameters)
 
     # Show Pre-Processed Images
     plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
@@ -100,8 +98,8 @@ def compare_area(image_directory):
     plt.show()
 
     # Segment Images @ segment.py
-    strain_area, strain_segmented,_ = segment(strain_image_processed, 'strain', 84)
-    bmode_area, bmode_segmented,_ = segment(bmode_image_processed, 'b-mode', 212)
+    strain_area, strain_segmented = segment(strain_image_processed, 'strain', hyperparameters)
+    bmode_area, bmode_segmented = segment(bmode_image_processed, 'b-mode', hyperparameters)
 
     # Show Segmented Images
     plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
@@ -117,4 +115,47 @@ def compare_area(image_directory):
     return strain_area, bmode_area
 
 # 10/58/09 | 234th Frame
-compare_area("../../Data/Frames/Malignant/10-58-09/235/")
+
+hyperparameters = {
+    'strain': {
+        'preprocessing_methods': {
+            'image_cropping': [0, 470, 100, 700],
+            'image_resizing':  0.4,
+            'closing_size'  :  12,
+            'closing_iters' :  1,
+            'med_blurring'  :  59
+        },
+        'lesion_locating_methods': {
+            'bin_threshold' :  193,
+        },
+        'segmentation_methods': {
+            'bin_threshold' :  84,
+            'open/dil_size' :  3,
+            'open_iters'    :  2,
+            'dil_iters'     :  3,
+            'dist_transform':  5,
+            'fg_thresh'     :  0.7
+        },
+    },
+    'bmode': {
+        'preprocessing_methods': {
+            'image_cropping': [0, 600, 100, 700],
+            'closing_size'  : 13,
+            'closing_iters' : 1,
+            'bilat_filter'  : 13,
+            'med_blurring'  : 25
+        },
+        'lesion_locating_methods': {
+            'bin_threshold' : 193
+        },
+        'segmentation_methods': {
+            'bin_threshold' : 212,
+            'open/dil_size' : 3,
+            'open_iters'    : 2,
+            'dil_iters'     : 3,
+            'dist_transform': 5,
+            'fg_thresh'     : 0.7
+        }
+    }
+}
+compare_area("../../Data/Frames/Malignant/10-58-09/235/", hyperparameters)
