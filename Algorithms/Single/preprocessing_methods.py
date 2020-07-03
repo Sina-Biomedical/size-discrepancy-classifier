@@ -41,6 +41,9 @@ def preprocess(image_filepath, hyperparameters):
     image = cv2.imread(image_filepath, 0)
     image_type = "strain" if image_filepath[-5:] == "n.jpg" else "bmode"
 
+    if len(image) == 768:
+        image = cv2.resize(image, (0, 0), fx = 0.78125, fy = 0.78125)
+
     if image_type == "strain":
 
         image_cropping = hyperparameters['strain']['preprocessing_methods']['image_cropping']

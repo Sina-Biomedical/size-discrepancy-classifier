@@ -91,9 +91,15 @@ def compare_area(image_directory, hyperparameters):
     bmode_image_processed = preprocess(bmode_image, hyperparameters)
 
     # Show Pre-Processed Images
-    plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
+    strain_image = cv2.imread(strain_image)
+    bmode_image = cv2.imread(bmode_image)
+    if len(strain_image) == 768:
+        strain_image = cv2.resize(strain_image, (0, 0), fx = 0.78125, fy = 0.78125)
+        bmode_image = cv2.resize(bmode_image, (0, 0), fx = 0.78125, fy = 0.78125)
+
+    plt.subplot(221), plt.imshow(strain_image, cmap='gray')
     plt.subplot(222), plt.imshow(strain_image_processed, cmap='gray')
-    plt.subplot(223), plt.imshow(cv2.imread(bmode_image), cmap='gray')
+    plt.subplot(223), plt.imshow(bmode_image, cmap='gray')
     plt.subplot(224), plt.imshow(bmode_image_processed, cmap='gray')
     plt.show()
 
@@ -102,9 +108,9 @@ def compare_area(image_directory, hyperparameters):
     bmode_area, bmode_segmented = segment(bmode_image_processed, 'b-mode', hyperparameters)
 
     # Show Segmented Images
-    plt.subplot(221), plt.imshow(cv2.imread(strain_image), cmap='gray')
+    plt.subplot(221), plt.imshow(strain_image, cmap='gray')
     plt.subplot(222), plt.imshow(strain_segmented, cmap='gray')
-    plt.subplot(223), plt.imshow(cv2.imread(bmode_image), cmap='gray')
+    plt.subplot(223), plt.imshow(bmode_image, cmap='gray')
     plt.subplot(224), plt.imshow(bmode_segmented, cmap='gray')
     plt.show()
 
@@ -129,7 +135,7 @@ hyperparameters = {
             'bin_threshold' :  193,
         },
         'segmentation_methods': {
-            'bin_threshold' :  84,
+            'bin_threshold' :  200,
             'open/dil_size' :  3,
             'open_iters'    :  2,
             'dil_iters'     :  3,
@@ -146,7 +152,7 @@ hyperparameters = {
             'med_blurring'  : 25
         },
         'lesion_locating_methods': {
-            'bin_threshold' : 193
+            'bin_threshold' : 50
         },
         'segmentation_methods': {
             'bin_threshold' : 212,
@@ -158,4 +164,4 @@ hyperparameters = {
         }
     }
 }
-compare_area("../../Data/Frames/Malignant/10-58-09/235/", hyperparameters)
+compare_area("../../Data/Frames/Benign/09-11-35/10/", hyperparameters)
