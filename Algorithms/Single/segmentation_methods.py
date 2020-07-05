@@ -80,8 +80,8 @@ def segment(image, image_type, hyperparameters):
         image_resizing = hyperparameters['strain']['preprocessing_methods']['image_resizing']
         strain_area = np.sum(binarized_image == 2) * ((1/image_resizing) ** 2)
 
-        plt.imshow(binarized_image, cmap='gray')
-        plt.show()
+        # plt.imshow(binarized_image, cmap='gray')
+        # plt.show()
 
         # RESIZE & PAD IMAGE --> ORIGINAL DIMENSIONS
         original_dims = [0, 600, 0,   800]
@@ -128,8 +128,8 @@ def segment(image, image_type, hyperparameters):
         binarized_image = fill_contours(markers)
         output_image[markers == -1] = 255
 
-        plt.imshow(binarized_image, cmap='gray')
-        plt.show()
+        # plt.imshow(binarized_image, cmap='gray')
+        # plt.show()
 
         #  DETERMINE LESION AREA
         bmode_area = np.sum(binarized_image == 2)
