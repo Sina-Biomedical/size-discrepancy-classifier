@@ -7,8 +7,8 @@ from tqdm import tqdm
 from PIL import Image, ImageEnhance
 from matplotlib import pyplot as plt
 
-source_directory = '../../../Data/Frames/'
-destination_directory = '../../../Data/CompareNET/Raw/'
+source_directory = '../../Data/Frames/'
+destination_directory = '../../Data/CompareNET/Raw/'
 
 def get_contours(image):
     _, binarized_image = cv2.threshold(image, 80, 255, 0)
@@ -42,11 +42,11 @@ def crop_image(image, boundaries):
 
 def parse_image(image):
     contours = get_contours(image)
-    bounds = find_boundaries(image, contours)
-    return crop(image, bounds)
+    boundaries = find_boundaries(image, contours)
+    return crop_image(image, boundaries)
 
 lesions = []
-root_directory = '../../../Data/AVI/'
+root_directory = '../../Data/AVI/'
 
 for path, subdirs, files in os.walk(root_directory):
     for file_name in files:
@@ -91,8 +91,8 @@ for path, subdirs, files in os.walk(root_directory):
                 count += 1
 
 # TRANSFORM IMAGES
-for lesion in tqdm(lesions):
-
+augmented_lesions = []
+for i, lesion in enumerate(tqdm(lesions)):
     transformed_lesion_1 = {
         'strain_image': np.fliplr(lesion['strain_image']),
         'bmode_image': np.fliplr(lesion['bmode_image']),
@@ -123,25 +123,27 @@ for lesion in tqdm(lesions):
         'classification': lesion['classification']
     }
 
-    lesions.append(transformed_lesion_1)
-    lesions.append(transformed_lesion_2)
-    lesions.append(transformed_lesion_3)
-    lesions.append(transformed_lesion_4)
-    lesions.append(transformed_lesion_5)
+    augmented_lesions.append(lesion)
+    augmented_lesions.append(transformed_lesion_1)
+    augmented_lesions.append(transformed_lesion_2)
+    augmented_lesions.append(transformed_lesion_3)
+    augmented_lesions.append(transformed_lesion_4)
+    augmented_lesions.append(transformed_lesion_5)
 
-training_set_size = int(0.95 * len(lesions))
-test_set_size = len(lesions) - training_set_size
 
-print("Dataset Size: " + str(len(lesions)))
+training_set_size = int(0.95 * len(augmented_lesions))
+test_set_size = len(augmented_lesions) - training_set_size
+
+print("Dataset Size: " + str(len(augmented_lesions)))
 print("Training Set Size: " + str(training_set_size))
 print("Test Set Size: " + str(test_set_size))
 
-training_images = numpy.zeros((training_set_size, 264, 264, 2))
-training_labels = numpy.zeros((training_set_size, 1))
-test_images     = numpy.zeros((training_set_size, 264, 264, 2))
-test_labels     = numpy.zeros((training_set_size, 1))
+training_images = np.zeros((training_set_size, 264, 264, 2))
+training_labels = np.zeros((training_set_size, 1))
+test_images     = np.zeros((training_set_size, 264, 264, 2))
+test_labels     = np.zeros((training_set_size, 1))
 
-for i, lesion in enumerate(tqdm(lesions)):
+for i, lesion in enumerate(tqdm(augmented_lesions)):
     if i <= training_set_size:
         training_images[i, [lesion['strain_image'], lesion['bmode_image']]]
         training_labels[i, lesion['classification']]
