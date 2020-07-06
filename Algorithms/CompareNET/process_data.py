@@ -1,49 +1,107 @@
+from PIL import Image, ImageEnhance
 import os
+import imageio
+from matplotlib import pyplot as plt
+from tqdm import tqdm
 import cv2
 import h5py
-import imageio
 import numpy as np
-from tqdm import tqdm
-from PIL import Image, ImageEnhance
-from matplotlib import pyplot as plt
 
 source_directory = '../../../Data/Frames/'
 destination_directory = '../../../Data/CompareNET/Raw/'
 
-def get_contours(image):
-    _, binarized_image = cv2.threshold(image, 80, 255, 0)
-    contours, _ = cv2.findContours(binarized_image, 1, 2)
-    contours = [contour for contour in contours if valid_contour(contour)]
+def to_numpy_array(address):
+    image = imageio.imread(address)
+    return image
+
+def flip_horizontal(image):
+    transformed_image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    return transformed_image, "FLR"
+
+def flip_vertical(image):
+    transformed_image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    return transformed_image, 'FTB'
+
+def rotate_90(image):
+    rotated_image = image.transpose(Image.ROTATE_90)
+    return rotated_image, "R90"
+
+def rotate_180(image):
+    rotated_image = image.transpose(Image.ROTATE_180)
+    return rotated_image, "R180"
+
+def rotate_270(image):
+    rotated_image = image.transpose(Image.ROTATE_270)
+    return rotated_image, "R270"
+
+def sharpen(image):
+    enhancer = ImageEnhance.Sharpness(image)
+    sharpened_image = enhancer.enhance(2.0)
+    return sharpened_image, "S2"
+
+def blur(image):
+    enhancer = ImageEnhance.Sharpness(image)
+    blurred_image = enhancer.enhance(0.0)
+    return blurred_image, "B0"
+
+def save_lesion(lesion, save_as = 'train'):
+    destination_path = os.path.join(destination_directory, lesion['classification'])
+
+    # destination_path = os.path.join(destination_directory, lesion['classification'] + '/', lesion['destination_name'] + ".jpg")
+    # Image.fromarray(lesion['image']).save(destination_path, 'JPEG')
+    #
+    # transformations = [flip_horizontal, flip_vertical, rotate_90, rotate_180, rotate_270, sharpen, blur]
+    # for transformation in transformations:
+    #     transformed_image, transformation_suffix = transformation(Image.fromarray(lesion['image']))
+    #     destination_path = os.path.join(destination_directory, lesion['classification'] + '/', lesion['destination_name'] + " " + transformation_suffix + ".jpg")
+    #     transformed_image.save(destination_path, 'JPEG')
+
+def get_contours(imgray):
+    # First make the image 1-bit and get contours
+    ret, thresh = cv2.threshold(imgray, 80, 255, 0)
+    contours, hierarchy = cv2.findContours(thresh, 1, 2)
+
+    # filter contours that are too large or small
+    size = get_size(imgray)
+    contours = [cc for cc in contours if contourOK(cc, size)]
     return contours
 
-def valid_contour(contour):
-    x, y, w, h = cv2.boundingRect(contour)
-    if w < 50 or h < 50: return False
-    area = cv2.contourArea(contour)
+def get_size(img):
+    ih, iw = img.shape[:2]
+    return iw * ih
+
+def contourOK(cc, size):
+    x, y, w, h = cv2.boundingRect(cc)
+    if w < 50 or h < 50: return False # too narrow or wide is bad
+    area = cv2.contourArea(cc)
     return area > 200
 
 def find_boundaries(img, contours):
-    y_1, x_1 = img.shape[:2]
-    x_2 = 0
-    y_2 = 0
+    # margin is the minimum distance from the edges of the image, as a fraction
+    ih, iw = img.shape[:2]
+    minx = iw
+    miny = ih
+    maxx = 0
+    maxy = 0
 
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        if x < x_1: x_1 = x
-        if y < y_1: y_1 = y
-        if x + w > x_2: x_2 = x + w
-        if y + h > y_2: y_2 = y + h
+    for cc in contours:
+        x, y, w, h = cv2.boundingRect(cc)
+        if x < minx: minx = x
+        if y < miny: miny = y
+        if x + w > maxx: maxx = x + w
+        if y + h > maxy: maxy = y + h
 
-    return (x_1, y_1, x_2, y_2)
+    return (minx, miny, maxx, maxy)
 
-def crop_image(image, boundaries):
-    x_1, y_1, x_2, y_2 = boundaries
-    return y_1, y_2, x_1, x_2
+def crop(img, boundaries):
+    minx, miny, maxx, maxy = boundaries
+    return miny, maxy, minx, maxx
 
-def parse_image(image):
-    contours = get_contours(image)
-    bounds = find_boundaries(image, contours)
-    return crop(image, bounds)
+def process_image(img):
+    contours = get_contours(img)
+    #cv2.drawContours(img, contours, -1, (0,255,0)) # draws contours, good for debugging
+    bounds = find_boundaries(img, contours)
+    return crop(img, bounds)
 
 lesions = []
 root_directory = '../../../Data/AVI/'
@@ -76,7 +134,7 @@ for path, subdirs, files in os.walk(root_directory):
                         bmode = frame[100:600, 480:480+image_size]
 
                     if count == 5:
-                        y1, y2, x1, x2 = parse_image(strain)
+                        y1, y2, x1, x2 = process_image(strain)
 
                     strain_cropped = cv2.resize(strain[y1:y1 + image_size, :], dsize=(264, 264))
                     bmode_cropped = cv2.resize(bmode[y1:y1 + image_size, :], dsize=(264, 264))
