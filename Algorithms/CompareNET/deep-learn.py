@@ -18,6 +18,9 @@ from keras.preprocessing.image import ImageDataGenerator
 img_rows, img_cols = 225, 300 # 224, 224 resized down from 360, 528
 color_channels = 1
 
+#get data
+
+
 if K.image_data_format() == 'channels_first':
     input_shape = (color_channels, img_rows, img_cols)
 else:
@@ -58,3 +61,8 @@ def buildModelStructure():
 def visualize(model):
     model.summary()
     SVG(model_to_dot(model).create(prog='dot', format='svg'))
+
+# train the network
+
+
+# use the network run it over the test set --> validation accuracy?
