@@ -15,18 +15,7 @@ from IPython.display import SVG
 from keras.utils.vis_utils import model_to_dot
 from keras.preprocessing.image import ImageDataGenerator
 
-img_rows, img_cols = 225, 300 # 224, 224 resized down from 360, 528
-color_channels = 1
-
-#get data
-
-
-if K.image_data_format() == 'channels_first':
-    input_shape = (color_channels, img_rows, img_cols)
-else:
-    input_shape = (img_rows, img_cols, color_channels)
-
-print('Input Shape: ', input_shape)
+input_shape = (264, 264, 2)
 
 convolution_parameters = {
     'filters'      : 32,
@@ -34,20 +23,20 @@ convolution_parameters = {
     'kernel_size'  : 3
 }
 
-def buildModelStructure():
+def build_model():
     model = Sequential()
 
-    model.add(Conv2D(filters, (conv_kernel, conv_kernel), padding='valid', input_shape = input_shape))
+    model.add(Conv2D(convolution_parameters['filters'], (convolution_parameters['kernel_size'], convolution_parameters['kernel_size']), padding = 'valid', input_shape = input_shape))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size = (pooling_area, pooling_area)))
+    model.add(MaxPooling2D(pool_size=(convolution_parameters['pool_window'], convolution_parameters['pool_window'])))
 
-    model.add(Conv2D(filters, (conv_kernel, conv_kernel)))
+    model.add(Conv2D(convolution_parameters['filters'], (convolution_parameters['kernel_size'], convolution_parameters['kernel_size'])))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(pooling_area, pooling_area)))
+    model.add(MaxPooling2D(pool_size=(convolution_parameters['pool_window'], convolution_parameters['pool_window'])))
 
-    model.add(Conv2D(64, (conv_kernel, conv_kernel)))
+    model.add(Conv2D(64, (convolution_parameters['kernel_size'], convolution_parameters['kernel_size'])))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(pooling_area, pooling_area)))
+    model.add(MaxPooling2D(pool_size=(convolution_parameters['pool_window'], convolution_parameters['pool_window'])))
 
     model.add(Flatten())
     model.add(Dense(64))
@@ -61,8 +50,3 @@ def buildModelStructure():
 def visualize(model):
     model.summary()
     SVG(model_to_dot(model).create(prog='dot', format='svg'))
-
-# train the network
-
-
-# use the network run it over the test set --> validation accuracy?
