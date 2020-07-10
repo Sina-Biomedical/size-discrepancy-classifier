@@ -31,34 +31,49 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
+from lesion_locating_methods import find_lesion
+
 # Best Image --> As close to a completely black lesion and completely white and uniform surrounding as possible.
 # *NOTE* More important than retaining the   shape of the lesion is retaining the size of the lesion.
 
-def preprocess(image, image_type, hyperparameters):
+def preprocess(image_filepath, hyperparameters):
+
+    image = cv2.imread(image_filepath, 0)
+    image_type = "strain" if image_filepath[-5:] == "n.jpg" else "bmode"
+
+    if len(image) == 768:
+        image = cv2.resize(image, (0, 0), fx = 0.78125, fy = 0.78125)
+
     if image_type == "strain":
+
+        image_cropping = hyperparameters['strain']['preprocessing_methods']['image_cropping']
+        processed_image = image[image_cropping[0]:image_cropping[1], image_cropping[2]:image_cropping[3]]
+
+        # IMAGE RESIZING // 0.4
+        image_resizing = hyperparameters['strain']['preprocessing_methods']['image_resizing']
+        processed_image = cv2.resize(processed_image, (0, 0), fx = image_resizing, fy = image_resizing)
 
         # MORPHOLOGICAL CLOSING // 11
         closing_size = hyperparameters['strain']['preprocessing_methods']['closing_size']
         closing_iters = hyperparameters['strain']['preprocessing_methods']['closing_iters']
         kernel = np.ones((closing_size, closing_size), np.uint8)
-        processed_image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=closing_iters)
+        processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=closing_iters)
 
         # MEDIAN BLURRING // 59
         med_blurring = hyperparameters['strain']['preprocessing_methods']['med_blurring']
         processed_image = cv2.medianBlur(processed_image, med_blurring)
 
-        processed_image = cv2.equalizeHist(processed_image)
-
-        med_blurring = hyperparameters['strain']['preprocessing_methods']['med_blurring']
-        processed_image = cv2.medianBlur(processed_image, med_blurring)
-
     else:
+
+         # IMAGE CROPPING // Height: 0 --> 470, Width: 100 --> 700
+        image_cropping = hyperparameters['bmode']['preprocessing_methods']['image_cropping']
+        processed_image = image[image_cropping[0]:image_cropping[1], image_cropping[2]:image_cropping[3]]
 
         # MORPHOLOGICAL CLOSING // 11
         closing_size = hyperparameters['bmode']['preprocessing_methods']['closing_size']
         closing_iters = hyperparameters['bmode']['preprocessing_methods']['closing_iters']
         kernel = np.ones((closing_size, closing_size), np.uint8)
-        processed_image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=closing_iters)
+        processed_image = cv2.morphologyEx(processed_image, cv2.MORPH_CLOSE, kernel, iterations=closing_iters)
 
         # BILATERAL FILTER // 79 -- Edge-Preserving Denoise
         bilat_filter = hyperparameters['bmode']['preprocessing_methods']['bilat_filter']
@@ -74,4 +89,6 @@ def preprocess(image, image_type, hyperparameters):
         # HISTOGRAM EQUALIZATION -- Intensifies/Increases Contrast
         processed_image = cv2.equalizeHist(processed_image)
 
+        # ISOLATE LESION USING HALO
+        processed_image = find_lesion(processed_image, hyperparameters)
     return processed_image
